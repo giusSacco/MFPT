@@ -19,7 +19,7 @@ def plot_trajectory(coord : Sequence[float], /, *, z_start : float, z_end : floa
     plt.tick_params(labelsize=15)
     plt.ylabel('Time ($n^o$ frame)',fontsize=18)
     plt.xlabel('z ($\AA$)',fontsize=18)
-    plt.plot(coord, range(len(coord)), linestyle=' ', markersize=2, marker = 'o')
+    plt.plot(coord % 90., range(len(coord)), linestyle=' ', markersize=2, marker = 'o') # %90. enforces BC for values >90 or < 0
     plt.axvline(x=z_start + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_start - delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_end + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
@@ -35,7 +35,7 @@ def plot_hist_zcounts(coord : Sequence[float], /, *,z_start: float, z_end : floa
         savefig_directory : str, savefigures : bool = True, add_savefig_name : str = '', **kwargs) -> NoReturn:
     plt.figure(figsize = (10,5))
     plt.title('Z count histrogram, '+filename, fontsize=18)
-    plt.hist(coord, bins = n_bins)
+    plt.hist(coord % 90., bins = n_bins)    # %90. enforces BC for values >90 or < 0
     plt.axvline(x=z_start + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_start - delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_end + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
@@ -59,7 +59,7 @@ def plot_free_energy(coord : Sequence[float], /, *,z_start : float, z_end : floa
         F = -k*T*Avogadro*np.log( (count/tot_frame)/bin_lenght )
         return F/1000       # /1000 -> kJ/mol
 
-    counts, bins = np.histogram(coord, bins=n_bins)
+    counts, bins = np.histogram(coord % 90., bins=n_bins) # %90. enforces BC for values >90 or < 0
     tot_frame = len(coord)      # == sum(counts)
     bin_lenght = bins[1]-bins[0]
     energy = [free_energy(count, tot_frame, bin_lenght) for count in counts]

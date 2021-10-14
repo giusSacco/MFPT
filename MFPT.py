@@ -6,9 +6,6 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 from timeit import default_timer as timer
 
-# TO DO:
-# Insert creation of pickle file
-
 # Importing custom modules
 if not os.path.exists('Libraries'):
     print("Error: Can't find directory 'Libraries'.")
@@ -45,7 +42,7 @@ def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
     (?:\d{2}-){3}      # 2 digits followed by '-', threefold. Non capturing group
     \d{2})_            # 2 digits followed by '_'     End of system_name group
     (\d+)                     # At least one digit --> Molarity
-    M_NAR\.pickle$                  # rest of filename + end of line
+    M_elf_-0.22\.pickle$                  # rest of filename + end of line
     ''', re.VERBOSE )       # VERBOSE -> whitespace ignored and enables comments
 
     file_infos = pattern.fullmatch(PICKLE) 
@@ -113,7 +110,7 @@ def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
     t_bins = np.linspace(0.1, np.amax(transition_times), params.nbins_t)
     hist, _ = np.histogram(transition_times, bins=t_bins)
     t_bin_len = t_bins[1]-t_bins[0]
-    best_vals, covar = curve_fit(fitfunction, t_bins[:-1]+(t_bin_len/2), hist, p0=[500.0, hist[0]] )
+    best_vals, covar = curve_fit(fitfunction, t_bins[:-1] + t_bin_len, hist, p0=[500.0, hist[0]] )
     f_bins = fitfunction(t_bins, *best_vals)    # y values of fit curve
 
     tau = best_vals[0]
@@ -168,7 +165,6 @@ try:
 except (OptionError, ParameterNotPresentError, SectionNotPresentError) as err:
     print(err)
     sys.exit(1)
-#delta_t = 2.0
 delta_t = 0.04
 
 # Creation of savefig_directory if it is needed and does not exist.
