@@ -6,9 +6,6 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 from timeit import default_timer as timer
 
-# TO DO:
-# Insert creation of pickle file
-
 # Importing custom modules
 if not os.path.exists('Libraries'):
     print("Error: Can't find directory 'Libraries'.")
