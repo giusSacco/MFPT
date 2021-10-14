@@ -35,14 +35,13 @@ Optional: production of graphs for Free Energy, Trajectory, Histogram of z count
 
 def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
 
-    # Getting file infos from filename: it must be of the format 00-00-00-00_0M_NAR.pickle (one or more digits before M)
+    # Getting file infos from filename: it must be of the format A_0M.pickle (one or more digits before M, any letter at the beginning)
     # beginning numbers identify the sistem, number before 'M' identify molarity.
     pattern = re.compile( r'''
     (^             # Beginning of group: system_name.   ^ ->beginning of string
-    (?:\d{2}-){3}      # 2 digits followed by '-', threefold. Non capturing group
-    \d{2})_            # 2 digits followed by '_'     End of system_name group
+    [a-zA-Z])_            # Letter identifying the system
     (\d+)                     # At least one digit --> Molarity
-    M_elf_-0.22\.pickle$                  # rest of filename + end of line
+    M\.pickle$                  # rest of filename + end of line
     ''', re.VERBOSE )       # VERBOSE -> whitespace ignored and enables comments
 
     file_infos = pattern.fullmatch(PICKLE) 
@@ -71,6 +70,21 @@ def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
         custom_plt.plot_hist_zcounts(z_coordinate_NAR, **plotting_params)        
         custom_plt.plot_free_energy(z_coordinate_NAR, **plotting_params)
 
+        # Plot of comparison of free energy for the same system at different molarity
+        if system_name not in sys_analysed: # Indicates if this couple of files has been already plotted in a previous cycle
+            for f in PICKLEs:   # Searches for the other file referring to the same system
+                if pattern.fullmatch(f) is None:
+                    # If the name of a file is wrong a warning will be printed later when it is analysed by the function PICKLE_data_analysis
+                    continue
+                if pattern.fullmatch(f).group(1) == system_name and pattern.fullmatch(f).group(2) != molarity: # Same system but different molarity
+                    with open(os.path.join(params.pickle_directory, f), 'rb') as fp:
+                        # z_coordinate_NAR_2 = pickle.load(fp)
+                        custom_plt.free_energy_comparison(z_coordinate_NAR, pickle.load(fp), \
+                            molarity1 = molarity,molarity2 = pattern.fullmatch(f).group(2), **plotting_params)
+                    sys_analysed.append(system_name)
+                    break
+            else:   # If the other file has not been found
+                print("Warning: The counterpart of '{PICKLE}' with different molarity has not been found in '{params.pickle_directory}'")
 
     #Compute total residence time and transition times from z_start to z_end
     transition_times  = list()
@@ -187,6 +201,9 @@ PICKLEs = tuple([ file_ for file_ in os.listdir(params.pickle_directory) if file
 if len(PICKLEs) == 0:
     print(f'Error: No valid file has been found in the directory {params.pickle_directory}')
     sys.exit(1)
+
+# List of already analysed systems
+sys_analysed = []
 
 # Creation of output file with the results of the data analysis
 with open(params.output_file, 'w') as out_file:
