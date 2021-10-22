@@ -1,4 +1,4 @@
-import os, re, sys, pickle
+import os, re, sys
 from typing import NoReturn
 import numpy as np
 from scipy.optimize import curve_fit
@@ -33,37 +33,36 @@ NaR Mean First Passage Time Data analysis. Takes input parameters and files from
 Optional: production of graphs for Free Energy, Trajectory, Histogram of z counts and MFPT distribution.'''
 
 
-def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
+def NPY_data_analysis(NPY : str) -> NoReturn:
 
-    # Getting file infos from filename: it must be of the format A_0M.pickle (one or more digits before M, any letter at the beginning)
+    # Getting file infos from filename: it must be of the format A_0M.npy (one or more digits before M, any letter at the beginning)
     # beginning numbers identify the sistem, number before 'M' identify molarity.
     pattern = re.compile( r'''
     (^             # Beginning of group: system_name.   ^ ->beginning of string
     [a-zA-Z])_            # Letter identifying the system
     (\d+)                     # At least one digit --> Molarity
-    M\.pickle$                  # rest of filename + end of line
+    M\.npy$                  # rest of filename + end of line
     ''', re.VERBOSE )       # VERBOSE -> whitespace ignored and enables comments
 
-    file_infos = pattern.fullmatch(PICKLE) 
+    file_infos = pattern.fullmatch(NPY) 
     if file_infos is None:  # Raises an error if filename does not match the pattern
-        raise FileNotValidError(PICKLE, msg = f"File name '{PICKLE}' does not match the required format 00-00-00-00_0M_NAR.pickle")
+        raise FileNotValidError(NPY, msg = f"File name '{NPY}' does not match the required format")
     system_name, molarity = file_infos.group(1), file_infos.group(2)
 
 
-    # load trajectory array from .pickle file
-    with open(os.path.join(params.pickle_directory, PICKLE), 'rb') as fp:
-        z_coordinate_NAR = pickle.load(fp)     # z_coordinate_NAR is np.ndarray
+    # Load trajectory array from .npy file
+    z_coordinate_NAR = np.load(os.path.join(params.npy_directory, NPY))     # z_coordinate_NAR is np.ndarray
 
 
     # Find z_start, z_min from z counts histogram    
     hist, bins = np.histogram(z_coordinate_NAR, bins = params.n_bins)
     dz = bins[1]-bins[0] # Angstrom
-    z_start = ( np.argmax( hist[ int(70/dz) : ] )  + int(70/dz) )* dz     # finds where the max of counts is for z>70
+    z_start = ( np.argmax( hist[ int(70/dz) :  int(80/dz)] )  + int(70/dz) )* dz  # finds where the max of counts is for 70<z<80
     z_end = ( np.argmax( hist[ int(40/dz) : int(70/dz) ] ) + int(40/dz) )* dz  # finds where the max of counts is for 40<z<70
     
     #Plot trajectory, z counts histogram and free energy
     if params.plot_graphs:
-        plotting_params['filename'] = PICKLE.removesuffix('.pickle')        
+        plotting_params['filename'] = NPY.removesuffix('.npy')        
         plotting_params['z_start'] = z_start
         plotting_params['z_end'] = z_end
         custom_plt.plot_trajectory(z_coordinate_NAR, **plotting_params)
@@ -72,19 +71,17 @@ def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
 
         # Plot of comparison of free energy for the same system at different molarity
         if system_name not in sys_analysed: # Indicates if this couple of files has been already plotted in a previous cycle
-            for f in PICKLEs:   # Searches for the other file referring to the same system
+            for f in NPYs:   # Searches for the other file referring to the same system
                 if pattern.fullmatch(f) is None:
-                    # If the name of a file is wrong a warning will be printed later when it is analysed by the function PICKLE_data_analysis
+                    # If the name of a file is wrong a warning will be printed later when it is analysed by the function NPY_data_analysis
                     continue
                 if pattern.fullmatch(f).group(1) == system_name and pattern.fullmatch(f).group(2) != molarity: # Same system but different molarity
-                    with open(os.path.join(params.pickle_directory, f), 'rb') as fp:
-                        # z_coordinate_NAR_2 = pickle.load(fp)
-                        custom_plt.free_energy_comparison(z_coordinate_NAR, pickle.load(fp), \
-                            molarity1 = molarity,molarity2 = pattern.fullmatch(f).group(2), **plotting_params)
+                    custom_plt.free_energy_comparison(z_coordinate_NAR, np.load(os.path.join(params.npy_directory, f)), \
+                        molarity1 = molarity, molarity2 = pattern.fullmatch(f).group(2), **plotting_params)
                     sys_analysed.append(system_name)
                     break
             else:   # If the other file has not been found
-                print("Warning: The counterpart of '{PICKLE}' with different molarity has not been found in '{params.pickle_directory}'")
+                print("Warning: The counterpart of '{NPY}' with different molarity has not been found in '{params.npy_directory}'")
 
     #Compute total residence time and transition times from z_start to z_end
     transition_times  = list()
@@ -107,12 +104,12 @@ def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
     if n_transitions == 0:      #  No transition found
         out_file.write('{:<15} {:<10} {:>15} {:>20.0f} \n'.format(system_name, molarity, 'NO TRANSITIONS', res ))
         
-        hist_figname = 'Hist_mfpt_' + PICKLE.removesuffix('.pickle') + params.add_savefig_name + '.png'
+        hist_figname = 'Hist_mfpt_' + NPY.removesuffix('.npy') + params.add_savefig_name + '.png'
         hist_figpath = os.path.join(params.savefig_directory, hist_figname)
         if os.path.exists(hist_figpath):    # Deletes previous MFPT hist (if it exists)
             os.remove(hist_figpath)
         
-        raise NoTransitionFoundError(PICKLE)
+        raise NoTransitionFoundError(NPY)
 
     transition_times = [n_frames * delta_t for n_frames in transition_times]    # conversion n of frame -> time
     res*=delta_t
@@ -132,7 +129,7 @@ def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
 
     # Plot histogram of mfpt distribution
     if params.plot_graphs:
-        hist_params = {'t_bins': t_bins, 'f_bins': f_bins, 'transition_times': transition_times, 'filename': PICKLE.removesuffix('.pickle'), \
+        hist_params = {'t_bins': t_bins, 'f_bins': f_bins, 'transition_times': transition_times, 'filename': NPY.removesuffix('.npy'), \
             'savefigures': params.save_figures, 'add_savefig_name': params.add_savefig_name, 'savefig_directory': params.savefig_directory}
         custom_plt.plt_hist_mfpt(**hist_params)
 
@@ -142,7 +139,7 @@ def PICKLE_data_analysis(PICKLE : str) -> NoReturn:
         system_name, molarity, n_transitions, res, res/n_transitions, np.mean(transition_times), tau, d_tau, np.max(transition_times), np.min(transition_times) ))
 
     # Progress and time elapsed
-    print(f'{PICKLEs.index(PICKLE) + 1}/{len(PICKLEs):<25} {timer()-timer_start:<20.1f}' )   
+    print(f'{NPYs.index(NPY) + 1}/{len(NPYs):<25} {timer()-timer_start:<20.1f}' )   
 
 
 
@@ -189,18 +186,21 @@ if params.plot_graphs:
     if (not os.path.exists(params.savefig_directory)) and params.save_figures:
         os.mkdir(params.savefig_directory)
 
-# Creation list of files .pickle found in pickle_directory
-if not os.path.exists(params.pickle_directory):
-    print(f'Error: Directory {params.pickle_directory} does not exist.')
+# Creation list of files .npy found in npy_directory
+if not os.path.exists(params.npy_directory):
+    print(f'Error: Directory {params.npy_directory} does not exist.')
     sys.exit(1)
-if not os.path.isdir(params.pickle_directory):
-    print(f"Error: '{params.pickle_directory}' is not a directory.")
+if not os.path.isdir(params.npy_directory):
+    print(f"Error: '{params.npy_directory}' is not a directory.")
     sys.exit(1)
-PICKLEs = tuple([ file_ for file_ in os.listdir(params.pickle_directory) if file_.endswith('.pickle') ])
-#print(PICKLEs)
-if len(PICKLEs) == 0:
-    print(f'Error: No valid file has been found in the directory {params.pickle_directory}')
+NPYs = tuple([ file_ for file_ in os.listdir(params.npy_directory) if file_.endswith('.npy') ])
+#print(NPYs)
+if len(NPYs) == 0:
+    print(f'Error: No valid file has been found in the directory {params.npy_directory}')
     sys.exit(1)
+
+print('MFPT NaR data analysis')
+print('The following files will be analysed: \n', ', '.join(NPYs))
 
 # List of already analysed systems
 sys_analysed = []
@@ -216,10 +216,10 @@ with open(params.output_file, 'w') as out_file:
     print('{:<25} {:<20}'.format('N. of analysed files:','Time elapsed (s):'))
 
 
-    # PICKLE data analysis
-    for PICKLE in PICKLEs:        
+    # NPY data analysis
+    for NPY in NPYs:        
         try:
-            PICKLE_data_analysis(PICKLE)            
+            NPY_data_analysis(NPY)            
         except (FileNotValidError, NoTransitionFoundError) as err:
             print('Warning: ', err, ', proceeding to next file.', sep='')
             continue

@@ -11,7 +11,7 @@ class Unmodifiable_Data():  # Reads the input parameters: checks their presence 
         self.__set_nbins_t('plotting params', 'nbins_t', int)
         self.__set_save_figures('plotting params', 'save_figures', bool)
         self.__set_plot_graphs('plotting params', 'plot_graphs', bool)
-        self.__set_pickle_directory('files and directories', 'pickle_directory')    # If type not specified -> str
+        self.__set_npy_directory('files and directories', 'npy_directory')    # If type not specified -> str
         self.__set_add_savefig_name('plotting params', 'add_savefig_name')
         self.__set_savefig_directory('plotting params', 'savefig_directory')
         self.__set_output_file('files and directories', 'output_file')
@@ -103,12 +103,12 @@ class Unmodifiable_Data():  # Reads the input parameters: checks their presence 
         return self.__save_figures
     save_figures = property(__get_save_figures)
 
-    def __set_pickle_directory(self, section, parameter_name):
+    def __set_npy_directory(self, section, parameter_name):
         self.check_presence(section, parameter_name)
-        self.__pickle_directory = self.cfg.get(section, parameter_name) 
-    def __get_pickle_directory(self):
-        return self.__pickle_directory
-    pickle_directory = property(__get_pickle_directory)
+        self.__npy_directory = self.cfg.get(section, parameter_name) 
+    def __get_npy_directory(self):
+        return self.__npy_directory
+    npy_directory = property(__get_npy_directory)
 
     def __set_add_savefig_name(self, section, parameter_name):
         self.check_presence(section, parameter_name)

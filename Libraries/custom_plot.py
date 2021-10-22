@@ -114,7 +114,7 @@ def free_energy_comparison(coord : Sequence[float],coord2 : Sequence[float], /, 
     energy2 = [free_energy(count2, tot_frame, bin_lenght2) for count2 in counts2]
 
     plt.plot( bins[1:] - bin_lenght/2, energy - energy[-1], linestyle = '-', label = f'{molarity1}M')
-    plt.plot( bins2[1:] - bin_lenght2/2, energy2 - energy[-1], linestyle = '-', label = f'{molarity2}M')
+    plt.plot( bins2[1:] - bin_lenght2/2, energy2 - energy2[-1], linestyle = '-', label = f'{molarity2}M')
     plt.axvline(x=z_start + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_start - delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_end + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
