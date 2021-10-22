@@ -1,5 +1,10 @@
-# PICKLE
-NewFiles/
+# Ignore all directories
+/*
+# Except the following
+!Nuovi Grafici MFPT/
+!Libraries
+
+# The rest is standard gitignore template for python
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
