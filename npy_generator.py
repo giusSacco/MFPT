@@ -5,6 +5,7 @@ from timeit import default_timer as timer
 
 timer_start = timer()
 
+# Directory where to look for TXT files can be parsed but deafault is 'NewFiles'
 PROGNAME = os.path.basename(sys.argv[0])
 parser = ArgumentParser(prog = PROGNAME)
 parser.add_argument('-d',dest= 'dir_', default = 'NewFiles')
@@ -22,12 +23,14 @@ if len(TXTs) == 0:
     print(f'Error: No valid file has been found in the directory {dir_}')
     sys.exit(1)
 
-files_created = []
-print('Files created:')
+print('The following files are being converted to NPY: ', ', '.join(TXTs))
+print('{:<25} {:<20}'.format('N. of analysed files:','Time elapsed (s):'))
 for i,TXT in enumerate(TXTs):
     array = np.loadtxt(os.path.join(dir_,TXT))
         
     new_file = TXT.removesuffix('.txt') + '.npy'
     np.save(os.path.join(dir_, new_file), array)
-    files_created.append(new_file)
-    print(f'{i+1}/{len(TXTs)} \t {new_file} \t {timer() - timer_start:.1f}s')
+
+    print(f'{i+1}/{len(TXTs):<25} {timer()-timer_start:<20.1f}' )   
+
+print('All NPY files have been created!')
