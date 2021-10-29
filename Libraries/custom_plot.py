@@ -49,7 +49,7 @@ def plot_hist_zcounts(coord : Sequence[float], /, *,z_start: float, z_end : floa
     plt.close()
 
 # Plot free energy
-def plot_free_energy(coord : Sequence[float], /, *,z_start : float, z_end : float, delta_z : float, filename : str, n_bins : int, 
+def plot_free_energy(coord : Sequence[float], /, *, z_start : float, z_end : float, delta_z : float, filename : str, n_bins : int, 
         savefig_directory : str, add_savefig_name : str = '', savefigures : bool = True, **kwargs) -> NoReturn:
 
     plt.figure(figsize = (10,5))
@@ -64,7 +64,9 @@ def plot_free_energy(coord : Sequence[float], /, *,z_start : float, z_end : floa
     bin_lenght = bins[1]-bins[0]
     energy = [free_energy(count, tot_frame, bin_lenght) for count in counts]
 
-    plt.plot( bins[1:] - bin_lenght/2, energy - energy[-1], linestyle = '-')
+    index_z_start = np.argmax( counts[ int(70/bin_lenght) :  int(80/bin_lenght)] )  + int(70/bin_lenght) # finds where the max of counts is for 70<z<80
+
+    plt.plot( bins[1:] - bin_lenght/2, energy - energy[index_z_start], linestyle = '-')
     plt.axvline(x=z_start + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_start - delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_end + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
@@ -113,8 +115,11 @@ def free_energy_comparison(coord : Sequence[float],coord2 : Sequence[float], /, 
     energy = [free_energy(count, tot_frame, bin_lenght) for count in counts]
     energy2 = [free_energy(count2, tot_frame, bin_lenght2) for count2 in counts2]
 
-    plt.plot( bins[1:] - bin_lenght/2, energy - energy[-1], linestyle = '-', label = f'{molarity1}M')
-    plt.plot( bins2[1:] - bin_lenght2/2, energy2 - energy2[-1], linestyle = '-', label = f'{molarity2}M')
+    index_z_start = np.argmax( counts[ int(70/bin_lenght) :  int(80/bin_lenght)] )  + int(70/bin_lenght) # finds where the max of counts is for 70<z<80
+    index_z_start2 = np.argmax( counts2[ int(70/bin_lenght2) :  int(80/bin_lenght2)] )  + int(70/bin_lenght2) # finds where the max of counts is for 70<z<80
+
+    plt.plot( bins[1:] - bin_lenght/2, energy - energy[index_z_start], linestyle = '-', label = f'{molarity1}M')
+    plt.plot( bins2[1:] - bin_lenght2/2, energy2 - energy2[index_z_start2], linestyle = '-', label = f'{molarity2}M')
     plt.axvline(x=z_start + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_start - delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_end + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)

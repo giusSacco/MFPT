@@ -36,7 +36,7 @@ Optional: production of graphs for Free Energy, Trajectory, Histogram of z count
 def NPY_data_analysis(NPY : str) -> NoReturn:
 
     # Getting file infos from filename: it must be of the format A_0M.npy (one or more digits before M, any letter at the beginning)
-    # beginning numbers identify the sistem, number before 'M' identify molarity.
+    # letter identify the system, number before 'M' identify molarity.
     pattern = re.compile( r'''
     (^             # Beginning of group: system_name.   ^ ->beginning of string
     [a-zA-Z])_            # Letter identifying the system
@@ -57,12 +57,14 @@ def NPY_data_analysis(NPY : str) -> NoReturn:
     # Find z_start, z_min from z counts histogram    
     hist, bins = np.histogram(z_coordinate_NAR, bins = params.n_bins)
     dz = bins[1]-bins[0] # Angstrom
-    z_start = ( np.argmax( hist[ int(70/dz) :  int(80/dz)] )  + int(70/dz) )* dz  # finds where the max of counts is for 70<z<80
+    index_z_start = np.argmax( hist[ int(70/dz) :  int(80/dz)] )  + int(70/dz) # finds where the max of counts is for 70<z<80
+    z_start = index_z_start * dz 
     z_end = ( np.argmax( hist[ int(40/dz) : int(70/dz) ] ) + int(40/dz) )* dz  # finds where the max of counts is for 40<z<70
     
     #Plot trajectory, z counts histogram and free energy
     if params.plot_graphs:
-        plotting_params['filename'] = NPY.removesuffix('.npy')        
+        plotting_params['filename'] = NPY.removesuffix('.npy')  
+        plotting_params['index_z_start'] = index_z_start      
         plotting_params['z_start'] = z_start
         plotting_params['z_end'] = z_end
         custom_plt.plot_trajectory(z_coordinate_NAR, **plotting_params)
