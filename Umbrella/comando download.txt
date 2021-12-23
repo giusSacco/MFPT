@@ -1,0 +1,1 @@
+pscp -P 22 biophys03@avogadro.sns.it:/home/biophys03/Luca/CNT77_ElectricField/B_umbrella_0025M "C:\Users\Giuseppe\Downloads"

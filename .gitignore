@@ -3,6 +3,7 @@
 # Except the following
 !Nuovi Grafici MFPT/
 !Libraries
+!Umbrella
 
 # The rest is standard gitignore template for python
 
