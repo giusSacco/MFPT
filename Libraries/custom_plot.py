@@ -112,7 +112,7 @@ def free_energy_comparison(coord : Sequence[float],coord2 : Sequence[float], /, 
     tot_frame = len(coord)      # == sum(counts)
     bin_lenght = bins[1]-bins[0]
     bin_lenght2 = bins2[1]-bins2[0]
-    energy = [free_energy(count, tot_frame, bin_lenght) for count in counts]
+    energy = [free_energy(count, tot_frame, bin_lenght) for count in counts]        # Vettorizzare!
     energy2 = [free_energy(count2, tot_frame, bin_lenght2) for count2 in counts2]
 
     index_z_start = np.argmax( counts[ int(70/bin_lenght) :  int(80/bin_lenght)] )  + int(70/bin_lenght) # finds where the max of counts is for 70<z<80

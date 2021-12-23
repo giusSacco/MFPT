@@ -1,3 +1,4 @@
+import multiprocessing
 import os, re, sys
 from typing import NoReturn
 import numpy as np
@@ -28,9 +29,7 @@ from Libraries.custom_errors import *          # Library with custom exceptions
 import Libraries.custom_class as custom_class    # Library with custom data class
 
 
-program_description = '''
-NaR Mean First Passage Time Data analysis. Takes input parameters and files from the parsed INI file and produces an output file with the result of the analysis.\
-Optional: production of graphs for Free Energy, Trajectory, Histogram of z counts and MFPT distribution.'''
+
 
 
 def NPY_data_analysis(NPY : str) -> NoReturn:
@@ -146,6 +145,9 @@ def NPY_data_analysis(NPY : str) -> NoReturn:
 
 
 ### START ###
+program_description = '''
+NaR Mean First Passage Time Data analysis. Takes input parameters and files from the parsed INI file and produces an output file with the result of the analysis.\
+Optional: production of graphs for Free Energy, Trajectory, Histogram of z counts and MFPT distribution.'''
 
 timer_start = timer()   # Start the timer
 
@@ -207,25 +209,32 @@ print('The following files will be analysed: \n', ', '.join(NPYs))
 # List of already analysed systems
 sys_analysed = []
 
-# Creation of output file with the results of the data analysis
 with open(params.output_file, 'w') as out_file:
-    out_file.write('\tRESULTS NAR DATA ANALYSIS\n')
-    out_file.write(f'\t PARAMETERS USED: \t delta_z = {params.delta_z} A \t Lag time = {params.lag_time} ps \t Accaptance rate = {params.acceptance_rate} \t Time is in ps\n')
-    out_file.write('{:<15} {:<10} {:>15} {:>20} {:>20} {:>20} {:>15} {:>15} {:>10} {:>10}\n'.format( \
-        'SYSTEM', 'MOLARITY','TRANSITION EV.','RESIDENCE TIME','MFPT as ratio','MFPT as mean','TAU FITTED', 'TAU DEV. STD.', 'MAX', 'MIN'))
+    if __name__ == '__main__':
+    # Creation of output file with the results of the data analysis
     
-    # Print execution progress
-    print('{:<25} {:<20}'.format('N. of analysed files:','Time elapsed (s):'))
+        out_file.write('\tRESULTS NAR DATA ANALYSIS\n')
+        out_file.write(f'\t PARAMETERS USED: \t delta_z = {params.delta_z} A \t Lag time = {params.lag_time} ps \t Accaptance rate = {params.acceptance_rate} \t Time is in ps\n')
+        out_file.write('{:<15} {:<10} {:>15} {:>20} {:>20} {:>20} {:>15} {:>15} {:>10} {:>10}\n'.format( \
+            'SYSTEM', 'MOLARITY','TRANSITION EV.','RESIDENCE TIME','MFPT as ratio','MFPT as mean','TAU FITTED', 'TAU DEV. STD.', 'MAX', 'MIN'))
+        
+        # Print execution progress
+        print('{:<25} {:<20}'.format('N. of analysed files:','Time elapsed (s):'))
 
 
-    # NPY data analysis
-    for NPY in NPYs:        
-        try:
-            NPY_data_analysis(NPY)            
-        except (FileNotValidError, NoTransitionFoundError) as err:
-            print('Warning: ', err, ', proceeding to next file.', sep='')
-            continue
-        #break          # Useful for testing on just one file
+        '''# NPY data analysis
+        for NPY in NPYs:        
+            try:
+                NPY_data_analysis(NPY)            
+            except (FileNotValidError, NoTransitionFoundError) as err:
+                print('Warning: ', err, ', proceeding to next file.', sep='')
+                continue
+            #break          # Useful for testing on just one file'''
+        processes = [multiprocessing.Process(target = NPY_data_analysis, args=(NPY,)) for NPY in NPYs]
+        for p in processes:
+            p.start()
+        for p in processes:
+            p.join()
 
     print(f"Results correctly printed in '{params.output_file}'")
     if params.plot_graphs and params.save_figures:
