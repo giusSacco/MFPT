@@ -1,0 +1,11 @@
+	RESULTS NAR DATA ANALYSIS
+	 PARAMETERS USED: 	 delta_z = 3.0 A 	 Lag time = 6.0 ps 	 Accaptance rate = 0.6 	 Time is in ps
+SYSTEM          MOLARITY    TRANSITION EV.       RESIDENCE TIME        MFPT as ratio         MFPT as mean      TAU FITTED   TAU DEV. STD.        MAX        MIN
+A               0025                    86               127996                 1488                 1488            1330             192       6754         76
+A               1                       28               100685                 3596                 3596            2450             255      20642        129
+B               0025                   123                97794                  795                  795             244              10       8798         18
+B               1                       13               196564                15120                13854            3098             679      75685        447
+C               0025                    98                50261                  513                  513             160              13       4455          6
+C               1                       54                46308                  858                  857             348              36       7377         24
+D               0025                    59                31715                  538                  534             344              21       3618          8
+D               1                       32               185365                 5793                 5464            9897            4369      16113        764
