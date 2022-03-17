@@ -1,4 +1,5 @@
-import sys
+from cProfile import label
+import sys, os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -27,11 +28,17 @@ def extract_xy(filename):
     
     return x_array, y_array
 
-fname = 'profile.xvg'
+systems = ['B', 'C']
+molarities = ['0025', 1]
+for system in systems:
+    plt.figure()
+    plt.title(f'System {system}')
+    for molarity in molarities:
+       fname = os.path.join('profiles',f'profile_{system}_{molarity}M.xvg')
+       t, z = extract_xy(fname)
+       plt.plot(t,z*4.18, label = f'{system} {molarity}M')
+    plt.legend()
+    plt.savefig(f'pmf_barrier_{system}.png', bbox_inches = 'tight', dpi=400)
 
-t, z = extract_xy(fname)
-print(t,z)
-
-plt.plot(t,z*4.18)
 plt.show()
 
