@@ -103,6 +103,8 @@ def free_energy_comparison(coord : Sequence[float],coord2 : Sequence[float], /, 
     plt.figure(figsize = (10,5))
     plt.title('Free energy profile, System '+filename[0], fontsize=18)
 
+    colors = {'1': 'blue', '0025':'red'}
+
     def free_energy(count : int, tot_frame : int, bin_lenght : float, T : float = 300) -> float :   # Constants are in Standard SI units, free energy is returned in kJ/mol
         F = -k*T*Avogadro*np.log( (count/tot_frame)/bin_lenght )
         return F/1000       # /1000 -> kJ/mol
@@ -118,8 +120,8 @@ def free_energy_comparison(coord : Sequence[float],coord2 : Sequence[float], /, 
     index_z_start = np.argmax( counts[ int(70/bin_lenght) :  int(80/bin_lenght)] )  + int(70/bin_lenght) # finds where the max of counts is for 70<z<80
     index_z_start2 = np.argmax( counts2[ int(70/bin_lenght2) :  int(80/bin_lenght2)] )  + int(70/bin_lenght2) # finds where the max of counts is for 70<z<80
 
-    plt.plot( bins[1:] - bin_lenght/2, energy - energy[index_z_start], linestyle = '-', label = f'{molarity1}M')
-    plt.plot( bins2[1:] - bin_lenght2/2, energy2 - energy2[index_z_start2], linestyle = '-', label = f'{molarity2}M')
+    plt.plot( bins[1:] - bin_lenght/2, energy - energy[index_z_start], linestyle = '-', label = f'{molarity1}M', color = colors[molarity1])
+    plt.plot( bins2[1:] - bin_lenght2/2, energy2 - energy2[index_z_start2], linestyle = '-', label = f'{molarity2}M', color = colors[molarity2])
     plt.axvline(x=z_start + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_start - delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
     plt.axvline(x=z_end + delta_z, color = boxes_color, dashes = dashes_imp, linewidth = boxes_linewidth)
