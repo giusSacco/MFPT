@@ -80,6 +80,9 @@ def NPY_data_analysis(NPY : str) -> NoReturn:
                 if pattern.fullmatch(f).group(1) == system_name and pattern.fullmatch(f).group(2) != molarity: # Same system but different molarity
                     custom_plt.free_energy_comparison(z_coordinate_NAR, np.load(os.path.join(params.npy_directory, f)), \
                         molarity1 = molarity, molarity2 = pattern.fullmatch(f).group(2), **plotting_params)
+                    if pattern.fullmatch(f).group(1) in ['B','C']:
+                        custom_plt.free_energy_comparison_with_umbrella(z_coordinate_NAR, np.load(os.path.join(params.npy_directory, f)), \
+                            molarity1 = molarity, molarity2 = pattern.fullmatch(f).group(2), **plotting_params)
                     sys_analysed.append(system_name)
                     break
             else:   # If the other file has not been found
