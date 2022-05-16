@@ -203,6 +203,6 @@ def free_energy_comparison_with_umbrella(coord : Sequence[float],coord2 : Sequen
            plt.plot(75-(t*10),(z-z[z_min_index])*4.184, label = f'Umbrella {systems_labels[system]} {molarity}M')
     plt.legend()
     plt.xlim(50,83)
-    plt.ylim(-1,35)
-    if savefigures: plt.savefig(f'pmf_barrier_{filename[0]}.png', bbox_inches = 'tight', dpi=400)
+    plt.ylim(-1,30)
+    if savefigures: plt.savefig(join(savefig_directory,f'pmf_barrier_{filename[0]}.png'), bbox_inches = 'tight', dpi=400)
     plt.close()
