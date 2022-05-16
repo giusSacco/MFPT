@@ -1,4 +1,3 @@
-from cProfile import label
 import sys, os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,17 +27,28 @@ def extract_xy(filename):
     
     return x_array, y_array
 
-systems = ['B', 'C']
+systems = ['B', 'C', 'neutral']
 molarities = ['0025', 1]
+
+
+plt.style.use('seaborn')
+plt.title(f'Umbrella Sampling')
+plt.ylabel('Potential of Mean Force ($kJ/mol$)',fontsize=18)
+plt.xlabel('z ($\AA$)',fontsize=18)
 for system in systems:
-    plt.figure()
-    plt.title(f'System {system}')
+    #plt.figure()
+    
     for molarity in molarities:
        fname = os.path.join('profiles',f'profile_{system}_{molarity}M.xvg')
        t, z = extract_xy(fname)
-       plt.plot(t,z*4.18, label = f'{system} {molarity}M')
+       z_min_index = np.argmin( z[ int((-.3-t[0])/(t[1]-t[0])) : int((.3-t[0])/(t[1]-t[0])) ] ) + int((-.3-t[0])/(t[1]-t[0]))
+       plt.plot(75-t*10,(z-z[z_min_index])*4.18, label = f'{system} {molarity}M')
     plt.legend()
-    plt.savefig(f'pmf_barrier_{system}.png', bbox_inches = 'tight', dpi=400)
 
-plt.show()
+y_min , y_max = plt.ylim()
+z_aimed_array = np.arange(-0.4, 2.05, 0.1)
+plt.vlines(75-z_aimed_array*10,y_min,y_max, linestyles='dashed', linewidth = .5)
+plt.ylim(y_min,y_max)
+plt.savefig(f'pmf_barriers_umbrella.png', bbox_inches = 'tight', dpi=400)
+plt.close()
 
